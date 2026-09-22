@@ -6,7 +6,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0F2440">
+    <meta name="theme-color" media="(prefers-color-scheme:light)" content="#0F2440">
+    <meta name="theme-color" media="(prefers-color-scheme:dark)"  content="#0a1628">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -26,7 +27,7 @@
             height: 100%;
             width: 100%;
             overflow: hidden;
-            background: #f8f7f4;
+            background: #F4F2ED;   /* matches the app's --paper */
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -41,7 +42,7 @@
             top: 0;
             left: 0;
             z-index: 1;
-            background: #ffffff;
+            background: #F4F2ED;
         }
 
         /* ========== LOADING OVERLAY ========== */
@@ -53,7 +54,7 @@
             height: 100vh;
             height: 100dvh;
             z-index: 9999;
-            background: linear-gradient(160deg, #faf9f7 0%, #f0ede8 50%, #f8f7f4 100%);
+            background: linear-gradient(160deg, #FAF8F4 0%, #EFEDE6 50%, #F4F2ED 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -269,6 +270,135 @@
                 letter-spacing: 0.8px;
             }
         }
+
+        /* ========== DOWNLOAD NOTES BUTTON (floating, always visible) ========== */
+        #notesBtn {
+            position: fixed;
+            /* sits just above the app's bottom nav bar; safe-area aware */
+            bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px 9px 12px;
+            border-radius: 50px;
+            border: 1px solid rgba(26, 61, 109, 0.18);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #1a3d6d;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 16px rgba(15, 36, 64, 0.14);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.3s ease;
+        }
+
+        #notesBtn svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        #notesBtn:hover {
+            box-shadow: 0 6px 20px rgba(15, 36, 64, 0.2);
+            transform: translateX(-50%) translateY(-1px);
+        }
+
+        #notesBtn:active {
+            transform: translateX(-50%) scale(0.97);
+        }
+
+        /* Reserved for future use — kept for compatibility with existing JS */
+        #notesBtn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            #notesBtn {
+                padding: 8px 14px 8px 11px;
+                font-size: 0.72rem;
+                bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+            }
+        }
+
+        /* ========== DARK MODE ========== */
+        /* The wrapper can't detect the app's own theme (cross-origin iframe),
+           but the app's pre-paint script uses prefers-color-scheme, so these
+           rules stay visually in sync ~95% of the time. */
+        @media (prefers-color-scheme: dark) {
+            html, body {
+                background: #080c17;
+            }
+
+            #appFrame {
+                background: #080c17;
+            }
+
+            #loadingOverlay {
+                background: linear-gradient(160deg, #0c1220 0%, #0a0f1c 50%, #080c17 100%);
+            }
+
+            .spinner-ring.outer {
+                border-top-color: #4a7ab5;
+                border-right-color: #4a7ab5;
+            }
+
+            .spinner-ring.inner {
+                border-bottom-color: #2a3350;
+                border-left-color: #2a3350;
+            }
+
+            .main-text {
+                color: #e6eaf2;
+            }
+
+            .sub-text {
+                color: #94a0b8;
+            }
+
+            .progress-track {
+                background-color: #1e2740;
+            }
+
+            .progress-fill {
+                background: linear-gradient(90deg, #4a7ab5, #7aa2ff);
+            }
+
+            .progress-percent {
+                color: #5a6580;
+            }
+
+            .retry-btn {
+                color: #8fb8e8;
+                border-color: #2a3350;
+            }
+
+            .retry-btn:hover {
+                border-color: #8fb8e8;
+                background: rgba(143, 184, 232, 0.08);
+            }
+
+            .bg-accent {
+                background: radial-gradient(circle, rgba(74, 122, 181, 0.14) 0%, transparent 70%);
+            }
+
+            #notesBtn {
+                background: rgba(16, 24, 39, 0.92);
+                border-color: rgba(255, 255, 255, 0.09);
+                color: #e6eaf2;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            }
+
+            #notesBtn:hover {
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+            }
+        }
     </style>
 </head>
 <body>
@@ -299,17 +429,29 @@
     <iframe
         id="appFrame"
         src="https://script.google.com/macros/s/AKfycbzfeIBxnGF1lSRieEDi1yjaw7sNf4WCpwi6G7gKo3N5FoFXb0Z59t0wL06jpyjbuYZmJw/exec"
-        allow="clipboard-write; fullscreen; geolocation"
+        allow="clipboard-read; clipboard-write; fullscreen; geolocation"
+        referrerpolicy="no-referrer"
         title="NSQF Planner Application"
     ></iframe>
+
+    <!-- Download Notes button (floating, always visible) -->
+    <button id="notesBtn" aria-label="Download Notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Download Notes</span>
+    </button>
 
     <script>
         (function() {
             // ---------- Configuration ----------
-            const MIN_LOADING_TIME = 2500;          // ms (minimum overlay display)
-            const MESSAGE_INTERVAL = 1200;          // ms between status changes
+            const MIN_LOADING_TIME = 1200;          // ms (minimum overlay display)
+            const MESSAGE_INTERVAL = 900;           // ms between status changes
             const IFRAME_TIMEOUT = 15000;           // ms before showing retry
             const FADE_DURATION = 600;              // must match CSS transition
+            const NOTES_URL = "https://hjkhan015-star.github.io/NotesNSQF/index.html";
 
             // Modern status message pairs
             const STATUS_PAIRS = [
@@ -327,6 +469,7 @@
             const progressPercent = document.getElementById('progressPercent');
             const retryBtn = document.getElementById('retryBtn');
             const iframe = document.getElementById('appFrame');
+            const notesBtn = document.getElementById('notesBtn');
 
             // ---------- State ----------
             let iframeLoaded = false;
@@ -454,9 +597,20 @@
                         setTimeout(() => {
                             overlay.style.display = 'none';
                         }, FADE_DURATION);
-                    }, 250); // small pause for readability
+
+                        // NOTE: The Download Notes button is intentionally NOT hidden
+                        // here anymore — it floats above the app's bottom nav and stays
+                        // available on every screen (login, launcher, modules).
+                    }, 250);
                 }
             }
+
+            // ---------- Download Notes button ----------
+            // Opens in a real browser tab (not an in-app iframe) so the device's
+            // normal download flow works properly.
+            notesBtn.addEventListener('click', () => {
+                window.open(NOTES_URL, '_blank', 'noopener');
+            });
 
             // ---------- Service worker (preserved) ----------
             if ('serviceWorker' in navigator) {
